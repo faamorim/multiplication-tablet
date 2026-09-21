@@ -1,0 +1,409 @@
+<title>The Babylonian Reciprocal Table</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #E9EDEC;
+    --surface: #FFFFFF;
+    --ink: #1C2530;
+    --ink-muted: #5B6B72;
+    --line: #C9D2D1;
+    --accent: #D79A3B;
+    --accent-strong: #B97D22;
+    --accent-ink: #3A2A0E;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #10151A;
+      --surface: #182029;
+      --ink: #E7ECEE;
+      --ink-muted: #93A3AA;
+      --line: #2B363E;
+      --accent: #E7B65C;
+      --accent-strong: #F2C877;
+      --accent-ink: #2A1E08;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #10151A;
+    --surface: #182029;
+    --ink: #E7ECEE;
+    --ink-muted: #93A3AA;
+    --line: #2B363E;
+    --accent: #E7B65C;
+    --accent-strong: #F2C877;
+    --accent-ink: #2A1E08;
+  }
+
+  #babylon-app, #babylon-app *{ box-sizing: border-box; }
+  #babylon-app{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    padding: 1.75rem 1rem 2.5rem;
+    max-width: 100%;
+  }
+  #babylon-app .stage{
+    max-width: 34rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+  }
+  #babylon-app #remSentinel{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1rem;
+    height: 1rem;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  #babylon-app .target-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.625rem;
+    padding: 0.875rem 1rem 1rem;
+  }
+  #babylon-app .target-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  #babylon-app .target-label{
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  #babylon-app .target-row{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  #babylon-app #targetSlider{
+    flex: 1 1 auto;
+    accent-color: var(--accent-strong);
+  }
+  #babylon-app #targetNumber{
+    width: 5.5rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-align: right;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.375rem 0.5rem;
+    background: var(--surface);
+    color: var(--ink);
+  }
+  #babylon-app #targetNumber:focus-visible,
+  #babylon-app #targetSlider:focus-visible{
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+  }
+  #babylon-app .target-preview{
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+    text-align: center;
+  }
+  #babylon-app .target-preview .num{
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 700;
+    color: var(--accent-strong);
+  }
+
+  #babylon-app .table-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.625rem;
+    padding: 0.875rem 1rem 1rem;
+  }
+  #babylon-app .table-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.625rem;
+  }
+  #babylon-app .table-label{
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  #babylon-app .row-count{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  #babylon-app .table-scroll{
+    max-height: 22rem;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+  }
+  #babylon-app .row{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.9375rem;
+    border-bottom: 1px dashed var(--line);
+  }
+  #babylon-app .row:last-child{ border-bottom: none; }
+  #babylon-app .row.header-row{
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-muted);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+  }
+  #babylon-app .rows .row:hover{
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  #babylon-app .row .p{
+    font-weight: 700;
+  }
+  #babylon-app .row .q{
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  #babylon-app .row .q-value{ font-weight: 700; }
+  #babylon-app .row .q-approx{
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.6875rem;
+    color: var(--ink-muted);
+  }
+  #babylon-app .empty-state{
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    text-align: center;
+  }
+
+  #babylon-app .legend{
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+  #babylon-app .legend strong{ color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce){
+    #babylon-app *{ transition: none !important; }
+  }
+</style>
+
+<div id="babylon-app">
+  <div class="stage">
+    <span id="remSentinel" aria-hidden="true"></span>
+
+    <div class="target-card">
+      <div class="target-head">
+        <span class="target-label">Target number</span>
+      </div>
+      <div class="target-row">
+        <input type="range" id="targetSlider" min="2" max="120" value="60">
+        <input type="number" id="targetNumber" min="2" max="1000000" value="60">
+      </div>
+      <div class="target-preview">
+        Numbers that multiply to <span class="num" id="targetPreview">60</span>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-head">
+        <span class="table-label">p &times; q = target</span>
+        <span class="row-count" id="rowCount">0 rows</span>
+      </div>
+      <div class="table-scroll">
+        <div class="row header-row">
+          <span>p</span>
+          <span>q &mdash; base 60</span>
+        </div>
+        <div class="rows" id="rows"></div>
+      </div>
+      <p class="empty-state" id="emptyState" hidden>No regular numbers &le; target yet &mdash; try a larger target.</p>
+    </div>
+
+    <p class="legend">
+      Only <strong>regular numbers</strong> &mdash; numbers built purely from the primes 2, 3, and 5 &mdash; appear as <strong>p</strong>. Those are the only ones whose partner terminates cleanly in base 60, exactly like the reciprocal tables Babylonian scribes carved into clay; a number like 7 or 11 would produce an endlessly repeating fraction. A comma separates the whole part from the sexagesimal fraction: <strong>7, 30</strong> means 7 and 30/60 (7.5); <strong>2, 13, 20</strong> means 2 + 13/60 + 20/3600.
+    </p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var MAX_ROWS = 500;
+  var MAX_FRACTION_DIGITS = 10;
+
+  var app = document.getElementById('babylon-app');
+  var remSentinelEl = document.getElementById('remSentinel');
+  var targetSlider = document.getElementById('targetSlider');
+  var targetNumber = document.getElementById('targetNumber');
+  var targetPreviewEl = document.getElementById('targetPreview');
+  var rowsEl = document.getElementById('rows');
+  var rowCountEl = document.getElementById('rowCount');
+  var emptyStateEl = document.getElementById('emptyState');
+  var tableScrollEl = document.querySelector('#babylon-app .table-scroll');
+
+  function bigGcd(a, b){
+    a = a < 0n ? -a : a;
+    b = b < 0n ? -b : b;
+    while (b){
+      var t = b;
+      b = a % b;
+      a = t;
+    }
+    return a;
+  }
+
+  // Regular numbers (a.k.a. 5-smooth numbers): only prime factors 2, 3, 5.
+  // Their reciprocals always terminate in base 60, since 60 = 2^2 * 3 * 5.
+  function regularNumbersUpTo(max){
+    var out = [];
+    for (var i2 = 1; i2 <= max; i2 *= 2){
+      for (var i23 = i2; i23 <= max; i23 *= 3){
+        for (var n = i23; n <= max; n *= 5){
+          if (n >= 2) out.push(n);
+          if (n > max / 5) break;
+        }
+        if (i23 > max / 3) break;
+      }
+      if (i2 > max / 2) break;
+    }
+    out.sort(function(a, b){ return a - b; });
+    return out;
+  }
+
+  function toSexagesimal(numerator, denominator){
+    var n = BigInt(numerator);
+    var d = BigInt(denominator);
+    var g = bigGcd(n, d);
+    n /= g; d /= g;
+
+    var intPart = n / d;
+    var remainder = n % d;
+    var digits = [];
+    var guard = 0;
+    while (remainder !== 0n && guard < MAX_FRACTION_DIGITS){
+      remainder *= 60n;
+      digits.push(remainder / d);
+      remainder = remainder % d;
+      guard++;
+    }
+    return { intPart: intPart, digits: digits };
+  }
+
+  function formatSexagesimal(sx){
+    if (!sx.digits.length) return String(sx.intPart);
+    return sx.intPart + ', ' + sx.digits.map(String).join(', ');
+  }
+
+  function formatApprox(target, p){
+    var value = target / p;
+    var rounded = Math.round(value * 10000) / 10000;
+    return '≈ ' + rounded;
+  }
+
+  function render(target){
+    var candidates = regularNumbersUpTo(target);
+    var truncated = candidates.length > MAX_ROWS;
+    if (truncated) candidates = candidates.slice(0, MAX_ROWS);
+
+    rowsEl.innerHTML = '';
+    candidates.forEach(function(p){
+      var sx = toSexagesimal(target, p);
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var pEl = document.createElement('span');
+      pEl.className = 'p';
+      pEl.textContent = p;
+
+      var qEl = document.createElement('span');
+      qEl.className = 'q';
+      var qValueEl = document.createElement('span');
+      qValueEl.className = 'q-value';
+      qValueEl.textContent = formatSexagesimal(sx);
+      qEl.appendChild(qValueEl);
+      if (sx.digits.length){
+        var qApproxEl = document.createElement('span');
+        qApproxEl.className = 'q-approx';
+        qApproxEl.textContent = formatApprox(target, p);
+        qEl.appendChild(qApproxEl);
+      }
+
+      row.appendChild(pEl);
+      row.appendChild(qEl);
+      rowsEl.appendChild(row);
+    });
+
+    var countText = candidates.length + (truncated ? (' of ' + regularNumbersUpTo(target).length) : '') + ' row' + (candidates.length === 1 ? '' : 's');
+    rowCountEl.textContent = countText;
+    emptyStateEl.hidden = candidates.length > 0;
+    tableScrollEl.hidden = candidates.length === 0;
+  }
+
+  function clampTarget(value){
+    if (!Number.isFinite(value)) return 2;
+    return Math.min(1000000, Math.max(2, Math.round(value)));
+  }
+
+  function reportHeightToParent(){
+    if (window.parent === window) return;
+    var height = Math.ceil(app.getBoundingClientRect().height);
+    window.parent.postMessage({ type: 'babylon-widget-resize', height: height }, '*');
+  }
+
+  function update(target){
+    target = clampTarget(target);
+    targetNumber.value = target;
+    targetSlider.value = Math.min(target, parseInt(targetSlider.max, 10));
+    targetPreviewEl.textContent = target;
+    render(target);
+    reportHeightToParent();
+  }
+
+  targetSlider.addEventListener('input', function(){
+    update(parseInt(targetSlider.value, 10));
+  });
+  targetNumber.addEventListener('input', function(){
+    var value = parseInt(targetNumber.value, 10);
+    if (Number.isFinite(value)) update(value);
+  });
+
+  update(60);
+
+  if (window.ResizeObserver){
+    var ro = new ResizeObserver(function(){ reportHeightToParent(); });
+    ro.observe(remSentinelEl);
+  } else {
+    var resizeTimer;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(reportHeightToParent, 150);
+    });
+  }
+
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(reportHeightToParent);
+  }
+})();
+</script>
