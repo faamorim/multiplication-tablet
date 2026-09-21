@@ -126,9 +126,10 @@
   }
   #babylon-app .table-head{
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: baseline;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.625rem;
     margin-bottom: 0.625rem;
   }
   #babylon-app .table-label{
@@ -138,14 +139,51 @@
     color: var(--ink-muted);
     font-weight: 600;
   }
+  #babylon-app .table-head-meta{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+  }
   #babylon-app .row-count{
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.75rem;
     color: var(--ink-muted);
     font-variant-numeric: tabular-nums;
   }
+
+  #babylon-app .mode-toggle{
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  #babylon-app .mode-toggle button{
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border: none;
+    border-left: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-muted);
+    padding: 0.375rem 0.625rem;
+    cursor: pointer;
+  }
+  #babylon-app .mode-toggle button:first-child{ border-left: none; }
+  #babylon-app .mode-toggle button:hover{ color: var(--ink); }
+  #babylon-app .mode-toggle button.active{
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  #babylon-app .mode-toggle button:focus-visible{
+    outline: 2px solid var(--accent-strong);
+    outline-offset: -2px;
+  }
+
   #babylon-app .table-scroll{
-    max-height: 22rem;
+    max-height: 24rem;
     overflow-y: auto;
     border: 1px solid var(--line);
     border-radius: 0.5rem;
@@ -175,26 +213,87 @@
   #babylon-app .rows .row:hover{
     background: color-mix(in srgb, var(--accent) 10%, transparent);
   }
-  #babylon-app .row .p{
-    font-weight: 700;
-  }
-  #babylon-app .row .q{
+  #babylon-app .row .p-cell,
+  #babylon-app .row .q-cell{
     display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.3rem;
   }
-  #babylon-app .row .q-value{ font-weight: 700; }
-  #babylon-app .row .q-approx{
-    font-family: "IBM Plex Sans", sans-serif;
-    font-size: 0.6875rem;
-    color: var(--ink-muted);
-  }
+  #babylon-app .row .num-repr{ font-weight: 700; }
+
+  /* --- mode toggle visibility --- */
+  #babylon-app[data-mode="numbers"] .cuneiform-repr{ display: none; }
+  #babylon-app[data-mode="cuneiform"] .num-repr{ display: none; }
+
   #babylon-app .empty-state{
     margin: 0.75rem 0 0;
     font-size: 0.875rem;
     color: var(--ink-muted);
     text-align: center;
+  }
+
+  /* --- cuneiform wedges --- */
+  #babylon-app .cuneiform-repr{
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+  }
+  #babylon-app .cune-digit{
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    background: color-mix(in srgb, var(--ink) 6%, var(--surface));
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.2rem 0.25rem;
+    min-height: 1.1rem;
+  }
+  #babylon-app .cune-tens{
+    display: flex;
+    gap: 0.06rem;
+  }
+  #babylon-app .cune-ones{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.06rem;
+    width: calc(3 * 0.3rem + 2 * 0.06rem);
+  }
+  #babylon-app .wedge-one{
+    display: inline-block;
+    width: 0.3rem;
+    height: 0.55rem;
+    background: linear-gradient(165deg, var(--ink) 0%, color-mix(in srgb, var(--ink) 55%, var(--surface)) 100%);
+    clip-path: polygon(50% 100%, 8% 0%, 92% 0%);
+  }
+  #babylon-app .wedge-ten{
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.32rem;
+    background: linear-gradient(165deg, var(--accent-strong) 0%, var(--accent) 100%);
+    clip-path: polygon(0% 50%, 100% 4%, 100% 96%);
+  }
+  #babylon-app .cune-zero{
+    width: 0.5rem;
+    height: 0.14rem;
+    border-radius: 1px;
+    background: var(--ink-muted);
+    opacity: 0.55;
+  }
+  #babylon-app .cune-gap{
+    display: inline-block;
+    width: 0.2rem;
+  }
+  #babylon-app .cune-radix{
+    display: inline-block;
+    align-self: stretch;
+    width: 0.09rem;
+    margin: 0 0.15rem;
+    background: var(--accent-strong);
+    border-radius: 1px;
   }
 
   #babylon-app .legend{
@@ -204,13 +303,14 @@
     margin: 0;
   }
   #babylon-app .legend strong{ color: var(--ink); }
+  #babylon-app .legend + .legend{ margin-top: 0.5rem; }
 
   @media (prefers-reduced-motion: reduce){
     #babylon-app *{ transition: none !important; }
   }
 </style>
 
-<div id="babylon-app">
+<div id="babylon-app" data-mode="numbers">
   <div class="stage">
     <span id="remSentinel" aria-hidden="true"></span>
 
@@ -230,7 +330,14 @@
     <div class="table-card">
       <div class="table-head">
         <span class="table-label">p &times; q = target</span>
-        <span class="row-count" id="rowCount">0 rows</span>
+        <div class="table-head-meta">
+          <div class="mode-toggle" role="radiogroup" aria-label="Number display">
+            <button type="button" class="mode-btn active" data-mode="numbers" aria-pressed="true">Numbers</button>
+            <button type="button" class="mode-btn" data-mode="both" aria-pressed="false">Both</button>
+            <button type="button" class="mode-btn" data-mode="cuneiform" aria-pressed="false">Cuneiform</button>
+          </div>
+          <span class="row-count" id="rowCount">0 rows</span>
+        </div>
       </div>
       <div class="table-scroll">
         <div class="row header-row">
@@ -243,7 +350,10 @@
     </div>
 
     <p class="legend">
-      Only <strong>regular numbers</strong> &mdash; numbers built purely from the primes 2, 3, and 5 &mdash; appear as <strong>p</strong>. Those are the only ones whose partner terminates cleanly in base 60, exactly like the reciprocal tables Babylonian scribes carved into clay; a number like 7 or 11 would produce an endlessly repeating fraction. A comma separates the whole part from the sexagesimal fraction: <strong>7, 30</strong> means 7 and 30/60 (7.5); <strong>2, 13, 20</strong> means 2 + 13/60 + 20/3600.
+      Only <strong>regular numbers</strong> &mdash; numbers built purely from the primes 2, 3, and 5 &mdash; appear as <strong>p</strong>. Those are the only ones whose partner terminates cleanly in base 60, exactly like the reciprocal tables Babylonian scribes carved into clay; a number like 7 or 11 would produce an endlessly repeating fraction. Commas separate sexagesimal digits, and a semicolon marks where the fraction begins: <strong>7; 30</strong> means 7 and 30/60 (7.5); <strong>2; 13, 20</strong> means 2 + 13/60 + 20/3600.
+    </p>
+    <p class="legend">
+      In <strong>Cuneiform</strong> mode each digit (0&ndash;59) is drawn the way a scribe would impress it: a corner wedge per ten, a thin wedge per one, grouped into a little clay block per sexagesimal place. Digit groups after the gold divider bar are the fractional part. There was no true zero in Old Babylonian numerals &mdash; scribes just left a gap &mdash; so a plain groove mark stands in for it here.
     </p>
   </div>
 </div>
@@ -262,6 +372,7 @@
   var rowCountEl = document.getElementById('rowCount');
   var emptyStateEl = document.getElementById('emptyState');
   var tableScrollEl = document.querySelector('#babylon-app .table-scroll');
+  var modeButtons = Array.prototype.slice.call(document.querySelectorAll('#babylon-app .mode-btn'));
 
   function bigGcd(a, b){
     a = a < 0n ? -a : a;
@@ -292,6 +403,17 @@
     return out;
   }
 
+  // Splits a non-negative BigInt into base-60 place-value digits, most significant first.
+  function toPlaces(bn){
+    if (bn === 0n) return [0];
+    var out = [];
+    while (bn > 0n){
+      out.unshift(Number(bn % 60n));
+      bn /= 60n;
+    }
+    return out;
+  }
+
   function toSexagesimal(numerator, denominator){
     var n = BigInt(numerator);
     var d = BigInt(denominator);
@@ -300,31 +422,99 @@
 
     var intPart = n / d;
     var remainder = n % d;
-    var digits = [];
+    var fracDigits = [];
     var guard = 0;
     while (remainder !== 0n && guard < MAX_FRACTION_DIGITS){
       remainder *= 60n;
-      digits.push(remainder / d);
+      fracDigits.push(Number(remainder / d));
       remainder = remainder % d;
       guard++;
     }
-    return { intPart: intPart, digits: digits };
+    return { intDigits: toPlaces(intPart), fracDigits: fracDigits };
   }
 
   function formatSexagesimal(sx){
-    if (!sx.digits.length) return String(sx.intPart);
-    return sx.intPart + ', ' + sx.digits.map(String).join(', ');
+    var text = sx.intDigits.join(', ');
+    if (sx.fracDigits.length) text += '; ' + sx.fracDigits.join(', ');
+    return text;
   }
 
-  function formatApprox(target, p){
-    var value = target / p;
-    var rounded = Math.round(value * 10000) / 10000;
-    return '≈ ' + rounded;
+  function buildCuneiformDigit(value){
+    var digit = document.createElement('span');
+    digit.className = 'cune-digit';
+    if (value === 0){
+      var zero = document.createElement('span');
+      zero.className = 'cune-zero';
+      digit.appendChild(zero);
+      return digit;
+    }
+    var tens = Math.floor(value / 10);
+    var ones = value % 10;
+    if (tens > 0){
+      var tensRow = document.createElement('span');
+      tensRow.className = 'cune-tens';
+      for (var i = 0; i < tens; i++){
+        var wt = document.createElement('span');
+        wt.className = 'wedge-ten';
+        tensRow.appendChild(wt);
+      }
+      digit.appendChild(tensRow);
+    }
+    if (ones > 0){
+      var onesGrid = document.createElement('span');
+      onesGrid.className = 'cune-ones';
+      for (var j = 0; j < ones; j++){
+        var wo = document.createElement('span');
+        wo.className = 'wedge-one';
+        onesGrid.appendChild(wo);
+      }
+      digit.appendChild(onesGrid);
+    }
+    return digit;
+  }
+
+  function buildCuneiformNumber(intDigits, fracDigits){
+    var wrap = document.createElement('span');
+    wrap.className = 'cuneiform-repr';
+    intDigits.forEach(function(d, i){
+      if (i > 0) wrap.appendChild(gapEl());
+      wrap.appendChild(buildCuneiformDigit(d));
+    });
+    if (fracDigits.length){
+      var radix = document.createElement('span');
+      radix.className = 'cune-radix';
+      wrap.appendChild(radix);
+      fracDigits.forEach(function(d, i){
+        if (i > 0) wrap.appendChild(gapEl());
+        wrap.appendChild(buildCuneiformDigit(d));
+      });
+    }
+    return wrap;
+  }
+
+  function gapEl(){
+    var g = document.createElement('span');
+    g.className = 'cune-gap';
+    return g;
+  }
+
+  function buildCell(className, numText, intDigits, fracDigits){
+    var cell = document.createElement('span');
+    cell.className = className;
+
+    var numEl = document.createElement('span');
+    numEl.className = 'num-repr';
+    numEl.textContent = numText;
+    cell.appendChild(numEl);
+
+    cell.appendChild(buildCuneiformNumber(intDigits, fracDigits || []));
+    return cell;
   }
 
   function render(target){
     var candidates = regularNumbersUpTo(target);
     var truncated = candidates.length > MAX_ROWS;
+    var totalCount = candidates.length;
     if (truncated) candidates = candidates.slice(0, MAX_ROWS);
 
     rowsEl.innerHTML = '';
@@ -333,29 +523,13 @@
       var row = document.createElement('div');
       row.className = 'row';
 
-      var pEl = document.createElement('span');
-      pEl.className = 'p';
-      pEl.textContent = p;
+      row.appendChild(buildCell('p-cell', String(p), toPlaces(BigInt(p))));
+      row.appendChild(buildCell('q-cell', formatSexagesimal(sx), sx.intDigits, sx.fracDigits));
 
-      var qEl = document.createElement('span');
-      qEl.className = 'q';
-      var qValueEl = document.createElement('span');
-      qValueEl.className = 'q-value';
-      qValueEl.textContent = formatSexagesimal(sx);
-      qEl.appendChild(qValueEl);
-      if (sx.digits.length){
-        var qApproxEl = document.createElement('span');
-        qApproxEl.className = 'q-approx';
-        qApproxEl.textContent = formatApprox(target, p);
-        qEl.appendChild(qApproxEl);
-      }
-
-      row.appendChild(pEl);
-      row.appendChild(qEl);
       rowsEl.appendChild(row);
     });
 
-    var countText = candidates.length + (truncated ? (' of ' + regularNumbersUpTo(target).length) : '') + ' row' + (candidates.length === 1 ? '' : 's');
+    var countText = candidates.length + (truncated ? (' of ' + totalCount) : '') + ' row' + (candidates.length === 1 ? '' : 's');
     rowCountEl.textContent = countText;
     emptyStateEl.hidden = candidates.length > 0;
     tableScrollEl.hidden = candidates.length === 0;
@@ -387,6 +561,19 @@
   targetNumber.addEventListener('input', function(){
     var value = parseInt(targetNumber.value, 10);
     if (Number.isFinite(value)) update(value);
+  });
+
+  modeButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      modeButtons.forEach(function(b){
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      app.dataset.mode = btn.dataset.mode;
+      reportHeightToParent();
+    });
   });
 
   update(60);
