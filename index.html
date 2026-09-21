@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Babylonian Reciprocal Table</title>
+<meta name="description" content="Enter a target number and browse its base-60 reciprocal pairs, Babylonian scribe-style.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #E9EDEC;
+    --ink: #1C2530;
+    --ink-muted: #5B6B72;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg: #10151A;
+      --ink: #E7ECEE;
+      --ink-muted: #93A3AA;
+    }
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  body{
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+  }
+  main{
+    max-width: 34rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
+  }
+  h1{
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+  }
+  .intro{
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
+  }
+  iframe{
+    width: 100%;
+    height: 900px;
+    border: none;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>The Babylonian Reciprocal Table</h1>
+  <p class="intro">Pick a target number and see every regular divisor paired with its base-60 partner &mdash; the same reciprocal tables Babylonian scribes carved into clay. Switch to Cuneiform mode to see the digits as they'd actually be written.</p>
+  <iframe id="widgetFrame" src="babylonian-reciprocal-table.html" title="Babylonian Reciprocal Table widget" scrolling="no"></iframe>
+</main>
+<script>
+  var frame = document.getElementById('widgetFrame');
+  window.addEventListener('message', function(e){
+    if (e.data && e.data.type === 'babylon-widget-resize' && typeof e.data.height === 'number'){
+      frame.style.height = e.data.height + 'px';
+    }
+  });
+</script>
+</body>
+</html>
