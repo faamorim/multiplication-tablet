@@ -291,6 +291,12 @@
     opacity: 0.5;
     border-radius: 1px;
   }
+  #babylon-app .cune-radix{
+    width: 0.09rem;
+    margin: 0 0.18rem;
+    background: var(--accent-strong);
+    opacity: 1;
+  }
 
   #babylon-app .legend{
     font-size: 0.75rem;
@@ -346,10 +352,10 @@
     </div>
 
     <p class="legend">
-      Only <strong>regular numbers</strong> &mdash; numbers built purely from the primes 2, 3, and 5 &mdash; appear as <strong>p</strong>. Those are the only ones whose partner terminates cleanly in base 60, exactly like the reciprocal tables Babylonian scribes carved into clay; a number like 7 or 11 would produce an endlessly repeating fraction. A comma separates every sexagesimal digit, whole part and fraction alike, the way the original tables write it: <strong>7, 30</strong> means 7 and 30/60 (7.5); <strong>2, 13, 20</strong> means 2 + 13/60 + 20/3600. The whole/fraction boundary isn't marked, so where a number "starts" is a matter of context &mdash; just as it was on the original tablets.
+      Only <strong>regular numbers</strong> &mdash; numbers built purely from the primes 2, 3, and 5 &mdash; appear as <strong>p</strong>. Those are the only ones whose partner terminates cleanly in base 60, exactly like the reciprocal tables Babylonian scribes carved into clay; a number like 7 or 11 would produce an endlessly repeating fraction. Commas separate sexagesimal digits, and a semicolon marks where the fraction begins: <strong>7; 30</strong> means 7 and 30/60 (7.5); <strong>2; 13, 20</strong> means 2 + 13/60 + 20/3600.
     </p>
     <p class="legend">
-      In <strong>Cuneiform</strong> mode each digit (0&ndash;59) is drawn the way a scribe would impress it: a corner wedge per ten, a thin wedge per one, grouped into a little clay block per sexagesimal place. The same thin line divides every digit group, whole part and fraction alike &mdash; nothing marks where the fraction begins, just like the commas above. There was no true zero in Old Babylonian numerals &mdash; scribes just left a gap &mdash; so a plain groove mark stands in for it here.
+      In <strong>Cuneiform</strong> mode each digit (0&ndash;59) is drawn the way a scribe would impress it: a corner wedge per ten, a thin wedge per one, grouped into a little clay block per sexagesimal place. Digit groups after the gold divider bar are the fractional part. There was no true zero in Old Babylonian numerals &mdash; scribes just left a gap &mdash; so a plain groove mark stands in for it here.
     </p>
   </div>
 </div>
@@ -430,7 +436,9 @@
   }
 
   function formatSexagesimal(sx){
-    return sx.intDigits.concat(sx.fracDigits).join(', ');
+    var text = sx.intDigits.join(', ');
+    if (sx.fracDigits.length) text += '; ' + sx.fracDigits.join(', ');
+    return text;
   }
 
   function buildCuneiformDigit(value){
@@ -470,17 +478,20 @@
   function buildCuneiformNumber(intDigits, fracDigits){
     var wrap = document.createElement('span');
     wrap.className = 'cuneiform-repr';
-    var allDigits = intDigits.concat(fracDigits);
-    allDigits.forEach(function(d, i){
-      if (i > 0) wrap.appendChild(dividerEl());
+    intDigits.forEach(function(d, i){
+      if (i > 0) wrap.appendChild(dividerEl(false));
+      wrap.appendChild(buildCuneiformDigit(d));
+    });
+    fracDigits.forEach(function(d, i){
+      wrap.appendChild(dividerEl(i === 0));
       wrap.appendChild(buildCuneiformDigit(d));
     });
     return wrap;
   }
 
-  function dividerEl(){
+  function dividerEl(isRadix){
     var d = document.createElement('span');
-    d.className = 'cune-divider';
+    d.className = 'cune-divider' + (isRadix ? ' cune-radix' : '');
     return d;
   }
 
